@@ -30,7 +30,8 @@ class Player:
             "NEWHAND"           :   self.newHand,
             "GETACTION"         :   self.getAction,
             "HANDOVER"          :   self.handOver
-        }       
+        }
+        self.rankOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
 
     '''
         Used for running the game bot, should not be edited
@@ -45,12 +46,13 @@ class Player:
             # If data is None, connection has closed.
             if not data:
                 print "Gameover, engine disconnected."
+                print "Bank: " + str(self.myBank)
                 break
             #Determine packet type
             word = data.split()[0]
             logging.info(word)
-            print word
             self.options[word](data)
+            print data
         # Clean up the socket.
         s.close()
 
@@ -103,10 +105,29 @@ class Player:
                                                 #and ace respectively). The second character indicates the suit of the card, drawn from {d,c,s,h}
         self.myBank = int(params[5])            #an integer indicating your cumulative change in bankroll
         self.otherBank = int(params[6])         #an integer indicating the opponent player's cumulative change in bankroll
+        print "\nHand: " + str(self.holeCards)
+
+    '''
+        Evaluate starting hand
+    '''
+    def startingHandEval(self):
+        #is pair
+        if list(self.holeCards[0])[0] == list(self.holeCards[1])[0]:
+            for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
+                if i > 7:
+                    return True
+        elif list(self.holeCards[0])[0] != list(self.holeCards[1])[0]:
+            for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
+                for j in [j for j,x in enumerate(self.rankOrder) if x == list(self.holeCards[1])[0]]:
+                    #Cards are close
+                    if (i-j) <= 4 or (j-i) <= 4:
+                        #Cards are high
+                        if i > 7 and j > 7:
+                            return True
+        return False
 
     '''
         Function to process getAction packet
-
         Ex.
         GETACTION potSize numBoardCards [boardCards] numLastActions [lastActions] numLegalActions [legalActions] timeBank
         GETACTION 30 5 As Ks Qh Qd Qc 3 CHECK:two CHECK:one DEAL:RIVER 2 CHECK BET:2:30 19.997999999999998
@@ -130,10 +151,14 @@ class Player:
             self.legalActions[i] = params[ind]
             ind += 1
         self.timeBank = float(params[ind])
+        
+        if self.startingHandEval():
+            print "Check"
+            s.send("CHECK\n")
+        else:
+            print "Fold"
+            s.send("FOLD\n")
 
-        # Currently CHECK on every move. You'll want to change this.
-        s.send("CHECK\n")
-    
     '''
         Function to process handOver packet
 
