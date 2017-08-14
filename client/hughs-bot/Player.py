@@ -108,7 +108,7 @@ class Player:
         print "\nHand: " + str(self.holeCards)
 
     '''
-        Evaluate starting hand
+        Evaluate starting hand pre-flop
     '''
     def startingHandEval(self):
         #is pair
@@ -119,12 +119,27 @@ class Player:
         elif list(self.holeCards[0])[0] != list(self.holeCards[1])[0]:
             for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
                 for j in [j for j,x in enumerate(self.rankOrder) if x == list(self.holeCards[1])[0]]:
-                    #Cards are close
+                    #Cards are close together by a distance of 4 or less
                     if (i-j) <= 4 or (j-i) <= 4:
-                        #Cards are high
-                        if i > 7 and j > 7:
+                        #Cards are higher than 7
+                        if i >= 7 and j >= 7:
                             return True
         return False
+
+    '''
+        Evaluate starting hand on flop
+    '''
+    def flopEval(self):
+        for x in list(self.boardCards):
+            if len(list(x)) > 0:
+                #first card forms a pair
+                if list(x)[0] == list(self.holeCards[0])[0]:
+                    return True
+                #second card forms a pair
+                if list(x)[0] == list(self.holeCards[1])[0]:
+                    return True
+        return False
+    
 
     '''
         Function to process getAction packet
@@ -152,12 +167,23 @@ class Player:
             ind += 1
         self.timeBank = float(params[ind])
         
-        if self.startingHandEval():
+        if self.numBoardCards == 0:
+            if self.startingHandEval():
+                print "Check"
+                s.send("CHECK\n")
+            else:
+                print "Fold"
+                s.send("FOLD\n")
+        elif self.startingHandEval() and self.numBoardCards == 3 and self.flopEval():
+            if self.flopEval():
+                print "Check"
+                s.send("CHECK\n")
+            else:
+                print "Fold"
+                s.send("FOLD\n")
+        else:
             print "Check"
             s.send("CHECK\n")
-        else:
-            print "Fold"
-            s.send("FOLD\n")
 
     '''
         Function to process handOver packet
