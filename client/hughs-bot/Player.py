@@ -3,7 +3,9 @@ import socket
 import sys
 import logging
 import lib.BillChenCalc as bcc 
+#exhaustive hand evaluation and scoring library - deuces
 from lib import Card, Evaluator, Deck
+import lib.monte_carlo_prob as MonteCarloProb
 
 #Dictionary to split up parsing different packages
 
@@ -147,7 +149,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        if rank >= (7462/2):
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        
+        if (rank >= (7462/2)) and prob > 0.5:
             return True
         else:
             return False
@@ -175,7 +179,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        if rank >= (7462/3):
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        
+        if rank >= (7462/3) and prob > 0.66:
             return True
         else:
             return False
@@ -205,7 +211,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        if rank >= (7462/4):
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        
+        if rank >= (7462/4) and prob > 0.75:
             return True
         else:
             return False
