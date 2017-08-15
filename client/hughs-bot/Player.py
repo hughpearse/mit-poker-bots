@@ -2,6 +2,8 @@ import argparse
 import socket
 import sys
 import logging
+import lib.BillChenCalc as bcc 
+from lib import Card, Evaluator, Deck
 
 #Dictionary to split up parsing different packages
 
@@ -53,7 +55,7 @@ class Player:
             word = data.split()[0]
             logging.info(word)
             self.options[word](data)
-            print data
+            #print data
         # Clean up the socket.
         s.close()
 
@@ -94,7 +96,7 @@ class Player:
         Ex.
         NEWHAND handId button holeCard1 holeCard2 holeCard3 holeCard4 myBank otherBank timeBank
         NEWHAND 10 true Ah Ac Kh Kc 100 -100 20.000000
-		
+        
     '''
     def newHand(self, data):
         self.reset()
@@ -107,51 +109,107 @@ class Player:
         self.myBank = int(params[5])            #an integer indicating your cumulative change in bankroll
         self.otherBank = int(params[6])         #an integer indicating the opponent player's cumulative change in bankroll
         self.handType = 0                       #no hand has been indentified yet
+        self.inGame = True
         print "\nHand: " + str(self.holeCards)
 
     '''
         Evaluate starting hand pre-flop
     '''
     def startingHandEval(self):
-        #pair in hole
-        if list(self.holeCards[0])[0] == list(self.holeCards[1])[0]:
-            self.handType = 2
-            for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
-                if i > 7:
-                    return True
-        elif list(self.holeCards[0])[0] != list(self.holeCards[1])[0]:
-            for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
-                for j in [j for j,x in enumerate(self.rankOrder) if x == list(self.holeCards[1])[0]]:
-                    #hole cards contains royal
-                    if i > 9 or j > 9:
-                        return True
-                    #Hole cards are close together by a distance of 4 or less
-                    if (i-j) <= 5 or (j-i) <= 5:
-                        #Both hole cards are higher than 7
-                        if i >= 7 and j >= 7:
-                            return True
-        return False
+        cardANumeral = list(self.holeCards[0])[0]
+        cardASuit = list(self.holeCards[0])[1]
+        cardBNumeral = list(self.holeCards[1])[0]
+        cardBSuit = list(self.holeCards[1])[1]
+        chenScore = bcc.calculate([str(cardANumeral+cardASuit), str(cardBNumeral+cardBSuit)])
+        
+        if (chenScore >= 8):
+            return True
+        else:
+            return False
 
     '''
-        Evaluate starting hand on flop
+        Evaluate hand after the flop
     '''
-    def flopEval(self):
-        pairA = False
-        pairB = False
-        for x in list(self.boardCards):
-            if len(list(x)) > 0:
-                #first card matches a card with flop
-                if list(x)[0] == list(self.holeCards[0])[0]:
-                    pairA = True
-                #second card matches a card with flop
-                if list(x)[0] == list(self.holeCards[1])[0]:
-                    pairB = True
-        if self.handType == 2 and pairA == True or pairB == True:
-            self.handType = 3
+    def postFlopEval(self):
+        b1 = Card.new(self.boardCards[0])
+        b2 = Card.new(self.boardCards[1])
+        b3 = Card.new(self.boardCards[2])
+        board = [
+            b1,
+            b2,
+            b3
+        ]
+        h1 = Card.new(self.holeCards[0])
+        h2 = Card.new(self.holeCards[1])
+        hand = [
+            h1,
+            h2
+        ]
+        evaluator = Evaluator()
+        rank = evaluator.evaluate(board, hand)
+        
+        if rank >= (7462/2):
             return True
         else:
             return False
     
+    '''
+        Evaluate hand after the turn
+    '''
+    def postTurnEval(self):
+        b1 = Card.new(self.boardCards[0])
+        b2 = Card.new(self.boardCards[1])
+        b3 = Card.new(self.boardCards[2])
+        b4 = Card.new(self.boardCards[3])
+        board = [
+            b1,
+            b2,
+            b3,
+            b4
+        ]
+        h1 = Card.new(self.holeCards[0])
+        h2 = Card.new(self.holeCards[1])
+        hand = [
+            h1,
+            h2
+        ]
+        evaluator = Evaluator()
+        rank = evaluator.evaluate(board, hand)
+        
+        if rank >= (7462/3):
+            return True
+        else:
+            return False
+
+    '''
+        Evaluate hand after the river
+    '''
+    def postRiverEval(self):
+        b1 = Card.new(self.boardCards[0])
+        b2 = Card.new(self.boardCards[1])
+        b3 = Card.new(self.boardCards[2])
+        b4 = Card.new(self.boardCards[3])
+        b5 = Card.new(self.boardCards[4])
+        board = [
+            b1,
+            b2,
+            b3,
+            b4,
+            b5
+        ]
+        h1 = Card.new(self.holeCards[0])
+        h2 = Card.new(self.holeCards[1])
+        hand = [
+            h1,
+            h2
+        ]
+        evaluator = Evaluator()
+        rank = evaluator.evaluate(board, hand)
+        
+        if rank >= (7462/4):
+            return True
+        else:
+            return False
 
     '''
         Function to process getAction packet
@@ -179,23 +237,46 @@ class Player:
             ind += 1
         self.timeBank = float(params[ind])
         
+        dealName = ""
+        for action in self.lastActions:
+            actionArray = action.split(':')
+            if actionArray[0] == "DEAL":
+                dealName = actionArray[1]
+                print "Round: " + dealName
+                print "Board cards: "  + str(self.boardCards)
+        
         if self.numBoardCards == 0:
-            if self.startingHandEval():
-                print "Check"
-                s.send("CHECK\n")
+            print "Hole cards: " + str(self.holeCards)
+            if self.startingHandEval() and self.inGame == True:
+                self.inGame = True
             else:
-                print "Fold"
-                s.send("FOLD\n")
-        elif self.startingHandEval() and self.numBoardCards == 3 and self.flopEval():
-            if self.flopEval():
-                print "Check"
-                s.send("CHECK\n")
+                self.inGame = False
+        elif self.numBoardCards == 3 and dealName == "FLOP":
+            if self.postFlopEval() and self.inGame == True:
+                self.inGame = True
             else:
-                print "Fold"
-                s.send("FOLD\n")
-        else:
-            print "Check"
-            s.send("CHECK\n")
+                self.inGame = False
+        elif self.numBoardCards == 4 and dealName == "TURN":
+            if self.postTurnEval() and self.inGame == True:
+                self.inGame = True
+            else:
+                self.inGame = False
+        elif self.numBoardCards == 5 and dealName == "RIVER":
+            if self.postRiverEval() and self.inGame == True:
+                self.inGame = True
+            else:
+                self.inGame = False
+        
+        checkCall = "" # CHECK CALL
+        for action in self.legalActions:
+            actionArray = action.split(':')
+            if actionArray[0] == "CALL" or actionArray[0] == "CHECK":
+                checkCall = actionArray[0]
+        
+        if self.inGame == True or self.button == True:
+            s.send(checkCall + "\n")
+        if self.inGame == False and self.button == False:
+            s.send("FOLD\n")
 
     '''
         Function to process handOver packet
