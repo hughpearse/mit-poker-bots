@@ -32,6 +32,7 @@ class Player:
             "HANDOVER"          :   self.handOver
         }
         self.rankOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
+        self.handType = 0 # [('0', 'nothing'), ('1', 'high'), ('2', ''pair), ('3', 'twoPair'), ('4', 'threeKind'), ('5', 'straight'), ]
 
     '''
         Used for running the game bot, should not be edited
@@ -105,23 +106,28 @@ class Player:
                                                 #and ace respectively). The second character indicates the suit of the card, drawn from {d,c,s,h}
         self.myBank = int(params[5])            #an integer indicating your cumulative change in bankroll
         self.otherBank = int(params[6])         #an integer indicating the opponent player's cumulative change in bankroll
+        self.handType = 0                       #no hand has been indentified yet
         print "\nHand: " + str(self.holeCards)
 
     '''
         Evaluate starting hand pre-flop
     '''
     def startingHandEval(self):
-        #is pair
+        #pair in hole
         if list(self.holeCards[0])[0] == list(self.holeCards[1])[0]:
+            self.handType = 2
             for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
                 if i > 7:
                     return True
         elif list(self.holeCards[0])[0] != list(self.holeCards[1])[0]:
             for i in [i for i,x in enumerate(self.rankOrder) if x == list(self.holeCards[0])[0]]:
                 for j in [j for j,x in enumerate(self.rankOrder) if x == list(self.holeCards[1])[0]]:
-                    #Cards are close together by a distance of 4 or less
-                    if (i-j) <= 4 or (j-i) <= 4:
-                        #Cards are higher than 7
+                    #hole cards contains royal
+                    if i > 9 or j > 9:
+                        return True
+                    #Hole cards are close together by a distance of 4 or less
+                    if (i-j) <= 5 or (j-i) <= 5:
+                        #Both hole cards are higher than 7
                         if i >= 7 and j >= 7:
                             return True
         return False
@@ -130,15 +136,21 @@ class Player:
         Evaluate starting hand on flop
     '''
     def flopEval(self):
+        pairA = False
+        pairB = False
         for x in list(self.boardCards):
             if len(list(x)) > 0:
-                #first card forms a pair
+                #first card matches a card with flop
                 if list(x)[0] == list(self.holeCards[0])[0]:
-                    return True
-                #second card forms a pair
+                    pairA = True
+                #second card matches a card with flop
                 if list(x)[0] == list(self.holeCards[1])[0]:
-                    return True
-        return False
+                    pairB = True
+        if self.handType == 2 and pairA == True or pairB == True:
+            self.handType = 3
+            return True
+        else:
+            return False
     
 
     '''
