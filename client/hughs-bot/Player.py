@@ -33,8 +33,6 @@ class Player:
             "GETACTION"         :   self.getAction,
             "HANDOVER"          :   self.handOver
         }
-        self.rankOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
-        self.handType = 0 # [('0', 'nothing'), ('1', 'high'), ('2', ''pair), ('3', 'twoPair'), ('4', 'threeKind'), ('5', 'straight'), ]
 
     '''
         Used for running the game bot, should not be edited
@@ -49,7 +47,7 @@ class Player:
             # If data is None, connection has closed.
             if not data:
                 print "Gameover, engine disconnected."
-                print "Bank: " + str(self.myBank)
+                print "Cumulative change in bankroll (P/L): " + str(self.myBank)
                 break
             #Determine packet type
             word = data.split()[0]
@@ -76,6 +74,7 @@ class Player:
         self.numHands = int(params[5])          #an integer indicating the maximum number of hands to be played this match in the case where the tournament is still ongoing
         self.timeBank = float(params[6])        #a floating point number indicating the number of seconds your bot has left to return an action
         self.totalTimeBank = float(params[6])
+
     '''
         Function to parse the key value packet
     '''
@@ -246,7 +245,6 @@ class Player:
                 print "Board cards: "  + str(self.boardCards)
         
         if self.numBoardCards == 0:
-            print "Hole cards: " + str(self.holeCards)
             if self.startingHandEval() and self.inGame == True:
                 self.inGame = True
             else:
@@ -268,14 +266,17 @@ class Player:
                 self.inGame = False
         
         checkCall = "" # CHECK CALL
+        canFold = False
         for action in self.legalActions:
             actionArray = action.split(':')
             if actionArray[0] == "CALL" or actionArray[0] == "CHECK":
                 checkCall = actionArray[0]
+            if actionArray[0] == "FOLD":
+                canFold = True
         
-        if self.inGame == True or self.button == True:
+        if self.inGame == True or canFold == False:
             s.send(checkCall + "\n")
-        if self.inGame == False and self.button == False:
+        if self.inGame == False and canFold == True:
             s.send("FOLD\n")
 
     '''
