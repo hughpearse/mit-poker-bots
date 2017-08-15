@@ -3,8 +3,9 @@ import socket
 import sys
 import logging
 import lib.BillChenCalc as bcc 
-#exhaustive hand evaluation and scoring library - deuces
+#exhaustive hand evaluation and scoring library - https://github.com/worldveil/deuces/
 from lib import Card, Evaluator, Deck
+#monte carlo simulation N iterations - https://github.com/ktseng/holdem_calc
 import lib.monte_carlo_prob as MonteCarloProb
 
 #Dictionary to split up parsing different packages
