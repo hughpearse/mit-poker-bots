@@ -2,11 +2,12 @@ import argparse
 import socket
 import sys
 import logging
-import lib.BillChenCalc as bcc 
+import lib.BillChenCalc as bcc
 #exhaustive hand evaluation and scoring library (fast) - https://github.com/worldveil/deuces/
 from lib import Card, Evaluator, Deck
 #monte carlo simulation N iterations - https://github.com/ktseng/holdem_calc
 import lib.monte_carlo_prob as MonteCarloProb
+import lib.MonteCarloSim as mcs
 
 #Dictionary to split up parsing different packages
 
@@ -56,7 +57,7 @@ class Player:
             word = data.split()[0]
             logging.info(word)
             self.options[word](data)
-            #print data
+            print data
         # Clean up the socket.
         s.close()
 
@@ -111,6 +112,8 @@ class Player:
         self.myBank = int(params[5])            #an integer indicating your cumulative change in bankroll
         self.otherBank = int(params[6])         #an integer indicating the opponent player's cumulative change in bankroll
         self.handType = 0                       #no hand has been indentified yet
+        self.timeBank = float(params[7])
+        self.lastBetValue = 0.0
         self.inGame = True
         print "\nHand: " + str(self.holeCards)
 
@@ -124,10 +127,7 @@ class Player:
         cardBSuit = list(self.holeCards[1])[1]
         chenScore = bcc.calculate([str(cardANumeral+cardASuit), str(cardBNumeral+cardBSuit)])
         
-        if (chenScore >= 8):
-            return True
-        else:
-            return False
+        return chenScore
 
     '''
         Evaluate hand after the flop
@@ -147,15 +147,13 @@ class Player:
             h1,
             h2
         ]
-        evaluator = Evaluator()
-        rank = evaluator.evaluate(board, hand)
+        #evaluator = Evaluator()
+        #rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2]])
         
-        if prob > 0.5:
-            return True
-        else:
-            return False
+        return prob
     
     '''
         Evaluate hand after the turn
@@ -177,15 +175,13 @@ class Player:
             h1,
             h2
         ]
-        evaluator = Evaluator()
-        rank = evaluator.evaluate(board, hand)
+        #evaluator = Evaluator()
+        #rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]])
         
-        if prob > 0.666:
-            return True
-        else:
-            return False
+        return prob
 
     '''
         Evaluate hand after the river
@@ -209,15 +205,13 @@ class Player:
             h1,
             h2
         ]
-        evaluator = Evaluator()
-        rank = evaluator.evaluate(board, hand)
+        #evaluator = Evaluator()
+        #rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]])
         
-        if prob > 0.75:
-            return True
-        else:
-            return False
+        return prob
 
     '''
         Function to process getAction packet
@@ -245,6 +239,7 @@ class Player:
             ind += 1
         self.timeBank = float(params[ind])
         
+        #Parse last actions
         dealName = ""
         for action in self.lastActions:
             actionArray = action.split(':')
@@ -252,41 +247,66 @@ class Player:
                 dealName = actionArray[1]
                 print "Round: " + dealName
                 print "Board cards: "  + str(self.boardCards)
+            if actionArray[0] == "POST" or actionArray[0] == "BET" or actionArray[0] == "RAISE":
+                #last POST BET or RAISE action is recorded
+                self.lastBetValue = actionArray[1]
         
-        if self.numBoardCards == 0:
-            if self.startingHandEval() and self.inGame == True:
-                self.inGame = True
-            else:
-                self.inGame = False
-        elif self.numBoardCards == 3 and dealName == "FLOP":
-            if self.postFlopEval() and self.inGame == True:
-                self.inGame = True
-            else:
-                self.inGame = False
-        elif self.numBoardCards == 4 and dealName == "TURN":
-            if self.postTurnEval() and self.inGame == True:
-                self.inGame = True
-            else:
-                self.inGame = False
-        elif self.numBoardCards == 5 and dealName == "RIVER":
-            if self.postRiverEval() and self.inGame == True:
-                self.inGame = True
-            else:
-                self.inGame = False
+        #Calculate card strength for each round type
+        handStrength = -1.0
+        if self.numBoardCards == 0 and self.inGame == True:#PRE-FLOP
+            handStrength = (float((100.0/20.0))*float(self.startingHandEval()))/100.0
+        elif self.numBoardCards == 3 and self.inGame == True:#FLOP
+            handStrength = self.postFlopEval()
+        elif self.numBoardCards == 4 and self.inGame == True:#TURN
+            handStrength = self.postTurnEval()
+        elif self.numBoardCards == 5 and self.inGame == True:#RIVER
+            handStrength = self.postRiverEval()
         
+        #parse possible actions
         checkCall = "" # CHECK CALL
         canFold = False
+        canBet = False
+        canCall = False
+        placeBetVal = 0
+        raiseBetCommand = ""
         for action in self.legalActions:
             actionArray = action.split(':')
             if actionArray[0] == "CALL" or actionArray[0] == "CHECK":
+                canCall = True
                 checkCall = actionArray[0]
             if actionArray[0] == "FOLD":
                 canFold = True
+            if actionArray[0] == "RAISE" or actionArray[0] == "BET":
+                canBet = True
+                raiseBetCommand = actionArray[0]
+                placeBetVal = actionArray[1]
         
-        if self.inGame == True or canFold == False:
-            s.send(checkCall + "\n")
-        if self.inGame == False and canFold == True:
+        #calculate rate of return
+        #where Rate of Return = Hand Strength / Pot Odds.
+        potOdds = 0.0
+        rateOfReturn = 1.0
+        if (checkCall == "CALL" or checkCall == "CHECK"):
+            potOdds = float(self.lastBetValue)/float(self.potSize)
+            rateOfReturn = float(handStrength)/float(potOdds)
+        
+        print "potOdds:" + str(potOdds)
+        print "handStrength:" + str(handStrength)
+        print "rateOfReturn:" + str(rateOfReturn)
+        
+        #FOLD, (CALL or CHECK), RAISE decision
+        if (rateOfReturn < 0.5 and canFold == True) or self.inGame == False:
+            self.inGame = False
+            print "FOLDING"
             s.send("FOLD\n")
+        elif ((rateOfReturn >= 0.5) and (rateOfReturn <= 1.3) and (self.inGame == True) and (canCall == True)):
+            print checkCall + "ING"
+            s.send(checkCall + "\n")
+        elif ((rateOfReturn > 1.3) and (self.inGame == True) and (canBet == True)):
+            print raiseBetCommand + "ING" + " by: " + str(placeBetVal)
+            s.send(raiseBetCommand + ":" + str(placeBetVal) + "\n")
+        else:
+            print checkCall + "ING"
+            s.send(checkCall + "\n")
 
     '''
         Function to process handOver packet
