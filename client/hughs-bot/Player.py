@@ -3,7 +3,7 @@ import socket
 import sys
 import logging
 import lib.BillChenCalc as bcc 
-#exhaustive hand evaluation and scoring library - https://github.com/worldveil/deuces/
+#exhaustive hand evaluation and scoring library (fast) - https://github.com/worldveil/deuces/
 from lib import Card, Evaluator, Deck
 #monte carlo simulation N iterations - https://github.com/ktseng/holdem_calc
 import lib.monte_carlo_prob as MonteCarloProb
@@ -150,9 +150,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         
-        if (rank >= (7462/2)) and prob > 0.5:
+        if prob > 0.5:
             return True
         else:
             return False
@@ -180,9 +180,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         
-        if rank >= (7462/3) and prob > 0.66:
+        if prob > 0.666:
             return True
         else:
             return False
@@ -212,9 +212,9 @@ class Player:
         evaluator = Evaluator()
         rank = evaluator.evaluate(board, hand)
         
-        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 300, None, [self.holeCards[0], self.holeCards[1]], False)
+        prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         
-        if rank >= (7462/4) and prob > 0.75:
+        if prob > 0.75:
             return True
         else:
             return False
