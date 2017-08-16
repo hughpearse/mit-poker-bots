@@ -283,6 +283,7 @@ class Player:
         
         #calculate rate of return
         #where Rate of Return = Hand Strength / Pot Odds.
+        #Mick West, "Inner Product", Game Developer Magazine, November 2005.
         potOdds = 0.0
         rateOfReturn = 1.0
         if (checkCall == "CALL" or checkCall == "CHECK"):
