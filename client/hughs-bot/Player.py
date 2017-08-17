@@ -3,10 +3,6 @@ import socket
 import sys
 import logging
 import lib.BillChenCalc as bcc
-#exhaustive hand evaluation and scoring library (fast) - https://github.com/worldveil/deuces/
-from lib import Card, Evaluator, Deck
-#monte carlo simulation N iterations - https://github.com/ktseng/holdem_calc
-import lib.monte_carlo_prob as MonteCarloProb
 import lib.MonteCarloSim as mcs
 
 #Dictionary to split up parsing different packages
@@ -133,84 +129,21 @@ class Player:
         Evaluate hand after the flop
     '''
     def postFlopEval(self):
-        b1 = Card.new(self.boardCards[0])
-        b2 = Card.new(self.boardCards[1])
-        b3 = Card.new(self.boardCards[2])
-        board = [
-            b1,
-            b2,
-            b3
-        ]
-        h1 = Card.new(self.holeCards[0])
-        h2 = Card.new(self.holeCards[1])
-        hand = [
-            h1,
-            h2
-        ]
-        #evaluator = Evaluator()
-        #rank = evaluator.evaluate(board, hand)
-        
-        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2]])
-        
         return prob
     
     '''
         Evaluate hand after the turn
     '''
     def postTurnEval(self):
-        b1 = Card.new(self.boardCards[0])
-        b2 = Card.new(self.boardCards[1])
-        b3 = Card.new(self.boardCards[2])
-        b4 = Card.new(self.boardCards[3])
-        board = [
-            b1,
-            b2,
-            b3,
-            b4
-        ]
-        h1 = Card.new(self.holeCards[0])
-        h2 = Card.new(self.holeCards[1])
-        hand = [
-            h1,
-            h2
-        ]
-        #evaluator = Evaluator()
-        #rank = evaluator.evaluate(board, hand)
-        
-        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3]])
-        
         return prob
 
     '''
         Evaluate hand after the river
     '''
     def postRiverEval(self):
-        b1 = Card.new(self.boardCards[0])
-        b2 = Card.new(self.boardCards[1])
-        b3 = Card.new(self.boardCards[2])
-        b4 = Card.new(self.boardCards[3])
-        b5 = Card.new(self.boardCards[4])
-        board = [
-            b1,
-            b2,
-            b3,
-            b4,
-            b5
-        ]
-        h1 = Card.new(self.holeCards[0])
-        h2 = Card.new(self.holeCards[1])
-        hand = [
-            h1,
-            h2
-        ]
-        #evaluator = Evaluator()
-        #rank = evaluator.evaluate(board, hand)
-        
-        #prob = MonteCarloProb.calculate([self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]], False, 1000, None, [self.holeCards[0], self.holeCards[1]], False)
         prob = mcs.calculate(100, 1, self.holeCards, [self.boardCards[0], self.boardCards[1], self.boardCards[2], self.boardCards[3], self.boardCards[4]])
-        
         return prob
 
     '''
