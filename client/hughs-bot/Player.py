@@ -186,8 +186,10 @@ class Player:
         
         #Calculate card strength for each round type
         handStrength = -1.0
+        billChenVal = 0.0
         if self.numBoardCards == 0 and self.inGame == True:#PRE-FLOP
-            handStrength = (float((100.0/20.0))*float(self.startingHandEval()))/100.0
+            billChenVal = self.startingHandEval()
+            handStrength = (float((100.0/20.0))*float(billChenVal))/100.0
         elif self.numBoardCards == 3 and self.inGame == True:#FLOP
             handStrength = self.postFlopEval()
         elif self.numBoardCards == 4 and self.inGame == True:#TURN
@@ -222,6 +224,9 @@ class Player:
         if (checkCall == "CALL" or checkCall == "CHECK"):
             potOdds = float(self.lastBetValue)/float(self.potSize)
             rateOfReturn = float(handStrength)/float(potOdds)
+        
+        if self.numBoardCards == 0 and billChenVal < 7:
+            self.inGame == False
         
         print "potOdds:" + str(potOdds)
         print "handStrength:" + str(handStrength)

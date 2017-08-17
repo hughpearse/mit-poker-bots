@@ -161,7 +161,7 @@ class Player:
         
         user_input = "X"
         if not (user_input in action_command_list):
-            user_input = raw_input('Enter action: ')
+            user_input = raw_input('Enter action command CALL/RAISE etc: ')
         
         if user_input == "CALL":
             s.send("CALL\n")
