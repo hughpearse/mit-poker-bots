@@ -160,11 +160,13 @@ class Player:
         for i in range(self.numBoardCards):
             self.boardCards[i] = params[ind]
             ind += 1
+        self.lastActions = [''] * 10
         self.numLastActions = int(params[ind])  #an integer indicating how many PerformedActions are in the lastActions list of actions
         ind += 1
         for i in range(self.numLastActions):
             self.lastActions[i] = params[ind]
             ind += 1
+        self.legalActions = ['', '', '', '', '']
         self.numLegalActions = int(params[ind]) #an integer indicating the number of LegalActions in the legalActions list of actions
         ind += 1
         for i in range(self.numLegalActions):

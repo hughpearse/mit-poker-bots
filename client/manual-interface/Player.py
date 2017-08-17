@@ -45,7 +45,6 @@ class Player:
             # If data is None, connection has closed.
             if not data:
                 print "Gameover, engine disconnected."
-                print "Cumulative change in bankroll (P/L): " + str(self.myBank)
                 break
             #Determine packet type
             word = data.split()[0]
@@ -218,6 +217,7 @@ class Player:
             action_command_list.append(actionArray[0])
             if len(actionArray[0]) > 0:
                 print " " + str(actionArray)
+        print "Cumulative change in bankroll (P/L): " + str(self.myBank)
 
     '''
         Resets before each new hand
