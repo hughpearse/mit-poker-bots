@@ -155,6 +155,7 @@ class Player:
         print "Possible Actions: "
         action_command_list = []
         for action in self.legalActions:
+            actionArray = []
             actionArray = action.split(':')
             action_command_list.append(actionArray[0])
             if len(actionArray[0]) > 0:
@@ -178,7 +179,7 @@ class Player:
             s.send("RAISE:" + str(quantity) + "\n")
         elif user_input == "DISCARD":
             card = raw_input('Enter card: ')
-            s.send("BET:" + str(card) + "\n")
+            s.send("DISCARD:" + str(card) + "\n")
         else:
             s.send("CHECK\n")
 
