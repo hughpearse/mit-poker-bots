@@ -240,7 +240,7 @@ class Player:
         
         #FOLD, (CALL or CHECK), RAISE decision
         if (rateOfReturn < 0.5 and canDiscard == True):
-            print "DISCARDING"
+            print "DISCARDING: " + str(self.holeCards[cardDiscardNum])
             s.send("DISCARD:" + self.holeCards[cardDiscardNum] + "\n")
         elif (rateOfReturn < 0.5 and canFold == True) or self.inGame == False:
             self.inGame = False
