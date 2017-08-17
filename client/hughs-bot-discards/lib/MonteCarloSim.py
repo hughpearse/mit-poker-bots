@@ -70,7 +70,7 @@ def calculate(iterations, numOpponents, hole, board):
 
 """
 Author: Hugh Pearse
-Calculate the 
+Calculate the weaker card within a tolerance
 """
 def calculate_discard_one(iterations, numOpponents, hole, board, confidenceInterval):
     deck = eval(repr(fulldeck))

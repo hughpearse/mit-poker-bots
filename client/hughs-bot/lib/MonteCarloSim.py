@@ -66,44 +66,5 @@ def calculate(iterations, numOpponents, hole, board):
     
     return float(wincount)/float(iterations)
 
-"""
-Author: Hugh Pearse
-Calculate the 
-"""
-def calculate_discard_one(iterations, numOpponents, hole, board, confidenceInterval):
-    deck = eval(repr(fulldeck))
-    for card in hole:
-        deck.remove(card)
-    for card in board:
-        deck.remove(card)
-    
-    h1Score = 0.0
-    h2Score = 0.0
-    for holecard in hole:
-        for iter in range(0,iterations):
-            deckCopy = eval(repr(deck))
-            randomCard = random.choice(list(deckCopy))
-            deckCopy.remove(randomCard)
-            newHole = [holecard, randomCard]
-            score = calculate(1, numOpponents, newHole, board)
-            if score == 1 and holecard == hole[0]:
-                h1Score += 1.0
-            elif score == 1 and holecard == hole[1]:
-                h2Score += 1.0
-    #negative number means discard hole card #1
-    #positive number means discard hole card #2
-    iterations = float(iterations)
-    result = 1.0-((h1Score/iterations)/(h2Score/iterations))
-    if result > confidenceInterval:
-        return 0#discard hole card #1
-    elif result < (confidenceInterval*-1.0):
-        return 1#discard hole card #2
-    else:
-        return -1#discard neither
-
 if __name__ == '__main__':
     #print calculate(100, 1, ['Ah', 'Ad'], ['Ts', '7s', '6s'])
-    #print calculate_discard_one(1000, 1, ['Ah', 'Ad'], ['Ts', '7s', '6s'], 0.05)
-    #print calculate_discard_one(1000, 1, ['2c', 'Ad'], ['Ts', '7s', '6s'], 0.05)
-    print calculate_discard_one(1000, 1, ['Ad', '2c'], ['Ts', '7s', '6s'], 0.05)
-    
