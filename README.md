@@ -9,3 +9,22 @@ This bot extends the previous bot by discarding weak cards evaluated using monte
 
 ## Manual command line interface
 This bot can be run as an alternative player allowing a human user to interact with a bot on the MIT server.
+
+## Setting up the environment
+The only dependency is Python 2.7.
+
+Configure the server
+```
+edit server/config.txt
+```
+
+Run the server
+```
+Open the command line and execute server/runserver.bat
+```
+
+Run a bot
+```
+Open the command line and execute client/hughs-bot-discards/pokerbot.bat
+```
+
