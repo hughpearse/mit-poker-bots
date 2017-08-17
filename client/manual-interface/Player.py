@@ -124,11 +124,13 @@ class Player:
         for i in range(self.numBoardCards):
             self.boardCards[i] = params[ind]
             ind += 1
+        self.lastActions = [''] * 10
         self.numLastActions = int(params[ind])  #an integer indicating how many PerformedActions are in the lastActions list of actions
         ind += 1
         for i in range(self.numLastActions):
             self.lastActions[i] = params[ind]
             ind += 1
+        self.legalActions = ['', '', '', '', '']
         self.numLegalActions = int(params[ind]) #an integer indicating the number of LegalActions in the legalActions list of actions
         ind += 1
         for i in range(self.numLegalActions):
@@ -145,6 +147,10 @@ class Player:
                 action_command_list.append(actionArray[0])
                 if len(actionArray[0]) > 0:
                     print " " + str(actionArray)
+                if actionArray[0] == "DISCARD":
+                    if len(actionArray) > 2:
+                        if actionArray[3] == self.yourName:
+                            self.holeCards.append(actionArray[2])
             if "DEAL" in action_command_list:
                 print "Hole cards:"
                 print "    " + str(self.holeCards)
@@ -180,6 +186,7 @@ class Player:
         elif user_input == "DISCARD":
             card = raw_input('Enter card: ')
             s.send("DISCARD:" + str(card) + "\n")
+            self.holeCards.remove(str(card))
         else:
             s.send("CHECK\n")
 
