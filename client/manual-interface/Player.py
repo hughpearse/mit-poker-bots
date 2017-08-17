@@ -137,18 +137,19 @@ class Player:
         self.timeBank = float(params[ind])
         
         #parse last actions
-        print "Last Actions: "
-        action_command_list = []
-        for action in self.lastActions:
-            actionArray = action.split(':')
-            action_command_list.append(actionArray[0])
-            if len(actionArray[0]) > 0:
-                print " " + str(actionArray)
-        if "DEAL" in action_command_list:
-            print "Hole cards:"
-            print "    " + str(self.holeCards)
-            print "Board cards:"
-            print "    " + str(self.boardCards)
+        if self.numBoardCards > 0:
+            print "Last Actions: "
+            action_command_list = []
+            for action in self.lastActions:
+                actionArray = action.split(':')
+                action_command_list.append(actionArray[0])
+                if len(actionArray[0]) > 0:
+                    print " " + str(actionArray)
+            if "DEAL" in action_command_list:
+                print "Hole cards:"
+                print "    " + str(self.holeCards)
+                print "Board cards:"
+                print "    " + str(self.boardCards)
         
         #parse possible actions
         print "Possible Actions: "
@@ -180,7 +181,6 @@ class Player:
             s.send("BET:" + str(card) + "\n")
         else:
             s.send("CHECK\n")
-        print " "
 
     '''
         Function to process handOver packet
@@ -202,6 +202,14 @@ class Player:
             self.lastActions[i] = params[ind]
             ind += 1
         self.timeBank = float(params[ind])
+        
+        print "Match finished: "
+        action_command_list = []
+        for action in self.lastActions:
+            actionArray = action.split(':')
+            action_command_list.append(actionArray[0])
+            if len(actionArray[0]) > 0:
+                print " " + str(actionArray)
 
     '''
         Resets before each new hand
