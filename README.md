@@ -11,7 +11,12 @@ This bot extends the previous bot by discarding weak cards evaluated using monte
 This bot can be run as an alternative player allowing a human user to interact with a bot on the MIT server.
 
 ## Setting up the environment
-The only dependency is Python 2.7.
+The only dependency is Python 2.7 with numpy
+
+Install Numpy
+```
+pip install numpy
+```
 
 Configure the server
 ```
