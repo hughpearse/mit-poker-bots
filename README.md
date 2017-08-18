@@ -28,8 +28,12 @@ Run the server
 Open the command line and execute server/runserver.bat
 ```
 
-Run a bot
+Run a bot as player 1
 ```
 Open the command line and execute client/hughs-bot-discards/pokerbot.bat -h localhost 3000
 ```
 
+Run a bot as player 2
+```
+Open the command line and execute client/hughs-bot-discards/pokerbot.bat -h localhost 3001
+```
