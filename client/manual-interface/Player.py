@@ -226,7 +226,10 @@ class Player:
                 board = [Card.new(self.boardCards[0]), Card.new(self.boardCards[1]), Card.new(self.boardCards[2]), Card.new(self.boardCards[3]), Card.new(self.boardCards[4])]
                 hand = [Card.new(actionArray[1]), Card.new(actionArray[2])]
                 score = evaluator.evaluate(board, hand)
-                matchSummary += "Player " + actionArray[3] + " had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
+                if actionArray[3] == self.yourName:
+                    matchSummary += "You had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
+                else:
+                    matchSummary += "Player " + actionArray[3] + " had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
         if len(matchSummary) > 0:
             print matchSummary
 
