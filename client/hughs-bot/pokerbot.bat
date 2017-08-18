@@ -1,2 +1,2 @@
 @ECHO ON
-python Player.py -h localhost 3000 %1
+python Player.py %1

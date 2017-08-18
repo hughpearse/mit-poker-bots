@@ -30,6 +30,6 @@ Open the command line and execute server/runserver.bat
 
 Run a bot
 ```
-Open the command line and execute client/hughs-bot-discards/pokerbot.bat
+Open the command line and execute client/hughs-bot-discards/pokerbot.bat -h localhost 3000
 ```
 

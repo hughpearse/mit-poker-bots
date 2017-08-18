@@ -1,2 +1,2 @@
 #!/bin/bash
-python Player.py -h localhost 3001 "$@"
+python Player.py "$@"
