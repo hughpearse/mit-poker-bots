@@ -221,9 +221,9 @@ class Player:
                 print " " + str(actionArray)
             if actionArray[0] == "SHOW" and self.numBoardCards == 5:
                 board = [Card.new(self.boardCards[0]), Card.new(self.boardCards[1]), Card.new(self.boardCards[2]), Card.new(self.boardCards[3]), Card.new(self.boardCards[4])]
-                hand = [Card.new(self.holeCards[0]), Card.new(self.holeCards[1])]
+                hand = [Card.new(actionArray[1]), Card.new(actionArray[2])]
                 score = evaluator.evaluate(board, hand)
-                matchSummary += "Player: " + actionArray[3] + " had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
+                matchSummary += "Player " + actionArray[3] + " had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
         if len(matchSummary) > 0:
             print matchSummary
         print "Cumulative change in bankroll (P/L): " + str(self.myBank)
