@@ -1,2 +1,2 @@
 @ECHO ON
-python Player.py %1
+python Player.py %*

@@ -67,4 +67,4 @@ def calculate(iterations, numOpponents, hole, board):
     return float(wincount)/float(iterations)
 
 if __name__ == '__main__':
-    #print calculate(100, 1, ['Ah', 'Ad'], ['Ts', '7s', '6s'])
+    print calculate(100, 1, ['Ah', 'Ad'], ['Ts', '7s', '6s'])
