@@ -107,7 +107,9 @@ class Player:
         self.timeBank = float(params[7])
         self.lastBetValue = 0.0
         self.inGame = True
-        print "\nNew Hand: " + str(self.holeCards)
+        print ""
+        print "Cumulative change in bankroll (P/L): " + str(self.myBank)
+        print "New Hand: " + str(self.holeCards)
 
     '''
         Function to process getAction packet
@@ -176,13 +178,13 @@ class Player:
             s.send("CHECK\n")
         elif user_input == "FOLD":
             s.send("FOLD\n")
-        elif user_input == "BET":
+        elif "BET" in user_input:
             quantity = raw_input('Enter amount: ')
             s.send("BET:" + str(quantity) + "\n")
-        elif user_input == "RAISE":
+        elif "RAISE" in user_input:
             quantity = raw_input('Enter amount: ')
             s.send("RAISE:" + str(quantity) + "\n")
-        elif user_input == "DISCARD":
+        elif "DISCARD" in user_input:
             card = raw_input('Enter card: ')
             s.send("DISCARD:" + str(card) + "\n")
             self.holeCards.remove(str(card))
@@ -226,7 +228,6 @@ class Player:
                 matchSummary += "Player " + actionArray[3] + " had a " + evaluator.class_to_string(evaluator.get_rank_class(score)) + ". "
         if len(matchSummary) > 0:
             print matchSummary
-        print "Cumulative change in bankroll (P/L): " + str(self.myBank)
 
     '''
         Resets before each new hand
