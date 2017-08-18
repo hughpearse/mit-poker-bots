@@ -109,6 +109,7 @@ class Player:
         self.inGame = True
         print ""
         print "Cumulative change in bankroll (P/L): " + str(self.myBank)
+        print "Hand Id: " + str(self.handId)
         print "New Hand: " + str(self.holeCards)
 
     '''
